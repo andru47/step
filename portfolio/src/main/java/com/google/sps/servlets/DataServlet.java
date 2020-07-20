@@ -14,19 +14,45 @@
 
 package com.google.sps.servlets;
 
+import com.google.sps.classes.Comment;
+
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import com.google.gson.Gson;
+
+import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/** Servlet that returns some example content. TODO: modify this file to handle comments data */
-@WebServlet("/data")
+/**
+ * Servlet that returns some example content. TODO: modify this file to handle
+ * comments data
+ */
+@WebServlet("/comments")
 public class DataServlet extends HttpServlet {
+  private List<Comment> arr = new ArrayList<>();
+
+  @Override
+  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    Comment newComment = new Comment(getParameter(request, "message"), getParameter(request, "name"));
+    arr.add(newComment);
+    response.sendRedirect("/comments.html");
+  }
+
+  private String getParameter(HttpServletRequest request, String param_name) {
+    if (request.getParameter(param_name).length() < 1)
+      return "Default value"; // To be modified in the future to show a warning
+    return request.getParameter(param_name);
+  }
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    response.setContentType("text/html;");
-    response.getWriter().println("<h1>Hello world!</h1>");
+    response.setContentType("application/json;");
+    Gson gson = new Gson();
+    String json = gson.toJson(arr);
+    response.getWriter().println(json);
   }
 }

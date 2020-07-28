@@ -34,6 +34,15 @@
       <option value="25">25</option>
       <option value="-1" selected>All</option>
     </select>
+
+    <label for="lang_code">Select the language:</label>
+
+    <select id="lang_code" onchange="fetchComments()">
+      <option value="en" selected>English</option>
+      <option value="ro">Romanian</option>
+      <option value="fr">French</option>
+      <option value="de">German</option>
+    </select>
   </div>
   <ul class="comment-section">
   </ul>

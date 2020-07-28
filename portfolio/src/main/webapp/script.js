@@ -64,14 +64,14 @@ function showImage() {
   document.getElementById("image-container").appendChild(image);
 }
 
-function FetchComments() {
+function fetchComments() {
   var nr = document.getElementById("number_comments").value;
   document.getElementsByClassName("comment-section")[0].innerHTML = '';
   fetch('/comments?how_many=' + nr).then(response => response.json()).then(messages => {
     messages.forEach(message => {
       makeElement(message.nickname, message.comment);
     })
-  }).then(LoginSelector());
+  }).then(loadUserInformation());
 }
 
 function makeElement(nickname, message) {
@@ -91,24 +91,24 @@ function makeElement(nickname, message) {
   document.getElementsByClassName("comment-section")[0].appendChild(newComment);
 }
 
-function DeleteComments() {
-  fetch("/delete-comment", { method: 'POST' }).then(response => FetchComments());
+function deleteComments() {
+  fetch("/delete-comment", { method: 'POST' }).then(response => fetchComments());
 }
 
-function LoginSelector() {
-  fetch('/login').then(response => response.json()).then(handler => {
-    if (handler.logged) {
+function loadUserInformation() {
+  fetch('/auth').then(response => response.json()).then(handler => {
+    if (handler.isLoggedIn) {
       document.getElementById("hide-id").style.display = "";
 
       var LogoutButton = document.createElement("button");
       LogoutButton.innerText = "Logout";
       LogoutButton.classList.add("btn");
       LogoutButton.classList.add("btn-danger");
-      LogoutButton.onclick = function () { window.open(handler.link, "_self"); };
+      LogoutButton.onclick = function () { window.open(handler.authLink, "_self"); };
 
       document.getElementById("comments-link").innerHTML = "";
       document.getElementById("comments-link").appendChild(LogoutButton);
-      return true;
+      loadNickname();
     }
     else {
       document.getElementById("hide-id").style.display = "none";
@@ -117,20 +117,17 @@ function LoginSelector() {
       LoginButton.innerText = "Login to see the contents";
       LoginButton.classList.add("btn");
       LoginButton.classList.add("btn-success");
-      LoginButton.onclick = function () { window.open(handler.link, "_self"); };
+      LoginButton.onclick = function () { window.open(handler.authLink, "_self"); };
 
       document.getElementById("comments-link").innerHTML = "";
       document.getElementById("comments-link").appendChild(LoginButton);
       return false;
     }
-  }).then(loggedin => {
-    if (loggedin)
-      NicknameFetcher();
   });
 }
 
-function NicknameFetcher() {
-  fetch("/set-nickname").then(response => response.json()).then(user => {
+function loadNickname() {
+  fetch("/user-info").then(response => response.json()).then(user => {
     var nickname = user.nickname;
     var email = user.email;
     var id = user.id;

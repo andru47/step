@@ -1,7 +1,7 @@
 package com.google.sps.servlets;
 
 import com.google.sps.classes.Comment;
-import com.google.sps.classes.LoginHandler;
+import com.google.sps.classes.AuthData;
 import com.google.sps.classes.User;
 
 import java.io.IOException;
@@ -26,23 +26,31 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.swing.RepaintManager;
 
-@WebServlet("/set-nickname")
-public class NicknameSetter extends HttpServlet {
+@WebServlet("/user-info")
+public class UserInfo extends HttpServlet {
   @Override
-  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     UserService userService = UserServiceFactory.getUserService();
-    String id = userService.getCurrentUser().getUserId();
+    
+    if (!userService.isUserLoggedIn()) { //Make sure that user is logged in to avoid Error 500
+      response.setContentType("text/html");
+      response.getWriter().print("<script>alert(\"Please login first.\")</script>");
+      RequestDispatcher dispatcher = request.getRequestDispatcher("/comments.html");
+      dispatcher.include(request, response);
+      return;
+    }
 
+    String id = userService.getCurrentUser().getUserId();
     Gson gson = new Gson();
 
-    Query q = new Query("Users").setFilter(new Query.FilterPredicate("id", Query.FilterOperator.EQUAL, id));
-    PreparedQuery result = datastore.prepare(q);
+    Query userQuery = new Query("Users").setFilter(new Query.FilterPredicate("id", Query.FilterOperator.EQUAL, id));
+    PreparedQuery result = datastore.prepare(userQuery);
     Entity givenEntity = result.asSingleEntity();
 
     if (givenEntity == null){
       response.setContentType("application/json;");
-      response.getWriter().println(gson.toJson(new User("", "", "")));
+      response.getWriter().println(gson.toJson(new User("", "", ""))); //Return an empty user to indicate in JS that they need to add a nickname first
       return;
     }
 
@@ -57,11 +65,20 @@ public class NicknameSetter extends HttpServlet {
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
     UserService userService = UserServiceFactory.getUserService();
+
+    if (!userService.isUserLoggedIn()) { //Make sure that user is logged in to avoid Error 500
+      response.setContentType("text/html");
+      response.getWriter().print("<script>alert(\"Please login first.\")</script>");
+      RequestDispatcher dispatcher = request.getRequestDispatcher("/comments.html");
+      dispatcher.include(request, response);
+      return;
+    }
+    
     String id = userService.getCurrentUser().getUserId();
     String email = userService.getCurrentUser().getEmail();
     String nickname = request.getParameter("nickname");
 
-    if (nickname.length() < 1) {
+    if (nickname.isEmpty()) {
       response.setContentType("text/html");
       response.getWriter()
           .print("<script>alert(\"The entered nickname must contain at least one character.\")</script>");

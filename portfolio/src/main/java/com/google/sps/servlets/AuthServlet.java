@@ -1,7 +1,7 @@
 package com.google.sps.servlets;
 
 import com.google.sps.classes.Comment;
-import com.google.sps.classes.LoginHandler;
+import com.google.sps.classes.AuthData;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,8 +23,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-@WebServlet("/login")
-public class LoginServlet extends HttpServlet {
+@WebServlet("/auth")
+public class AuthServlet extends HttpServlet {
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     UserService userService = UserServiceFactory.getUserService();
@@ -33,11 +33,11 @@ public class LoginServlet extends HttpServlet {
     if (userService.isUserLoggedIn())
     {
       String logoutUrl = userService.createLogoutURL("/comments.html");
-      response.getWriter().println(gson.toJson(new LoginHandler(true, logoutUrl)));
+      response.getWriter().println(gson.toJson(new AuthData(true, logoutUrl)));
     }
     else{
       String loginUrl = userService.createLoginURL("/comments.html");
-      response.getWriter().println(gson.toJson(new LoginHandler(false, loginUrl)));
+      response.getWriter().println(gson.toJson(new AuthData(false, loginUrl)));
     }
   }
 }

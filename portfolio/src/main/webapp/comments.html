@@ -16,7 +16,7 @@
   <script src="script.js"></script>
 </head>
 
-<body onload="FetchComments()" style="overflow-x: hidden;">
+<body onload="fetchComments()" style="overflow-x: hidden;">
   <div id="navBar">
     <!-- Used to include the same navbar on each page.-->
     <script>
@@ -28,7 +28,7 @@
   <div style="position: relative; left: 25%; width: 50vw;">
     <label for="number_comments">How many comments to be displayed:</label>
 
-    <select id="number_comments" onchange="FetchComments()">
+    <select id="number_comments" onchange="fetchComments()">
       <option value="5">5</option>
       <option value="10">10</option>
       <option value="25">25</option>
@@ -44,7 +44,7 @@
         onclick="showElementByID('nickname-container'); hideElementByID('hide-unlogged')">here</a>
     </div>
     <div id="nickname-container" style="display: none;">
-      <form action="/set-nickname" method="POST">
+      <form action="/user-info" method="POST">
         <input type="text" placeholder="Enter a desired nickname" name="nickname" required>
         <input type="submit" />
       </form>
@@ -58,7 +58,7 @@
         <input type="submit" />
       </form>
       <div style="position: relative; left: 25%; width: 50vw;">
-        <button class="btn btn-danger" onclick="DeleteComments()">Click here to delete all comments.</button>
+        <button class="btn btn-danger" onclick="deleteComments()">Click here to delete all comments.</button>
       </div>
     </div>
   </div>

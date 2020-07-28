@@ -40,21 +40,21 @@ public class DataServlet extends HttpServlet {
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    Query q = new Query("Comment").addSort("timestamp");
+    Query commentsQuery = new Query("Comment").addSort("timestamp");
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
-    PreparedQuery results = datastore.prepare(q);
+    PreparedQuery results = datastore.prepare(commentsQuery);
     List<Comment> arr = new ArrayList<>();
     int how_many = Integer.parseInt(request.getParameter("how_many"));
 
     for (Entity it : results.asIterable()) {
       String message = (String) it.getProperty("message");
-      String UID = (String) it.getProperty("id");
+      String uid = (String) it.getProperty("id");
       long timestamp = (long) it.getProperty("timestamp");
       long id = (long) it.getKey().getId();
 
-      Query q_nickname = new Query("Users").setFilter(new Query.FilterPredicate("id", Query.FilterOperator.EQUAL, UID));
-      PreparedQuery result = datastore.prepare(q_nickname); // Get the nickname of the user who wrote the current comment
+      Query nicknameQuery = new Query("Users").setFilter(new Query.FilterPredicate("id", Query.FilterOperator.EQUAL, uid));
+      PreparedQuery result = datastore.prepare(nicknameQuery); // Get the nickname of the user who wrote the current comment
       Entity givenEntity = result.asSingleEntity();
 
       String name = (String) givenEntity.getProperty("nickname");

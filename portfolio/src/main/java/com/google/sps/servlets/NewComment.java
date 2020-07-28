@@ -49,14 +49,14 @@ public class NewComment extends HttpServlet {
       return;
     }
 
-    String UID = userService.getCurrentUser().getUserId();
-    Query q = new Query("Users").setFilter(new Query.FilterPredicate("id", Query.FilterOperator.EQUAL, UID));
-    PreparedQuery result = datastore.prepare(q);
+    String uid = userService.getCurrentUser().getUserId();
+    Query usersQuery = new Query("Users").setFilter(new Query.FilterPredicate("id", Query.FilterOperator.EQUAL, uid));
+    PreparedQuery result = datastore.prepare(usersQuery);
     Entity givenEntity = result.asSingleEntity();
     String nickname = (String) givenEntity.getProperty("nickname");
     String entered_message = getParameter(request, "message");
 
-    if (nickname.length() == 0) { //Don't let an user without a nickname to post a comment.
+    if (nickname.isEmpty()) { //Don't let an user without a nickname to post a comment.
       response.setContentType("text/html");
       response.getWriter().print("<script>alert(\"You must set your nickname first.\")</script>");
       RequestDispatcher dispatcher = request.getRequestDispatcher("/comments.html");
@@ -64,7 +64,7 @@ public class NewComment extends HttpServlet {
       return;
     }
 
-    if (entered_message.length() == 0) {
+    if (entered_message.isEmpty()) {
       response.setContentType("text/html");
       response.getWriter()
           .print("<script>alert(\"The entered message must contain at least one character.\")</script>");
@@ -74,7 +74,7 @@ public class NewComment extends HttpServlet {
     }
 
     Entity taskEntity = new Entity("Comment");
-    taskEntity.setProperty("id", UID); //store the user's ID to deal with nickname changes
+    taskEntity.setProperty("id", uid); //store the user's ID to deal with nickname changes
     taskEntity.setProperty("message", entered_message);
     taskEntity.setProperty("timestamp", System.currentTimeMillis());
 
@@ -84,7 +84,7 @@ public class NewComment extends HttpServlet {
   }
 
   private String getParameter(HttpServletRequest request, String param_name) {
-    if (request.getParameter(param_name).length() < 1)
+    if (request.getParameter(param_name).isEmpty())
       return "";
     return request.getParameter(param_name);
   }

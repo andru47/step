@@ -54,6 +54,12 @@ input{
   order: 2;
 }
 
+.comments-button{
+  position: relative; 
+  left: 25%; 
+  width: 50vw;
+}
+
 .video-container{
   overflow: hidden;
   height: 100%;

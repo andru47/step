@@ -64,14 +64,14 @@ function showImage() {
   document.getElementById("image-container").appendChild(image);
 }
 
-function FetchComments() {
+function fetchComments() {
   var nr = document.getElementById("number_comments").value;
   document.getElementsByClassName("comment-section")[0].innerHTML = '';
   fetch('/comments?how_many=' + nr).then(response => response.json()).then(messages => {
     messages.forEach(message => {
       makeElement(message.nickname, message.comment);
     })
-  });
+  }).then(loadUserInformation());
 }
 
 function makeElement(nickname, message) {
@@ -91,6 +91,73 @@ function makeElement(nickname, message) {
   document.getElementsByClassName("comment-section")[0].appendChild(newComment);
 }
 
-function DeleteComments(){
-  fetch("/delete-comment", {method: 'POST'}).then(response => FetchComments());
+function deleteComments() {
+  fetch("/delete-comment", { method: 'POST' }).then(response => fetchComments());
+}
+
+function loadAuthInformation() {
+  fetch('/auth').then(response => response.json()).then(handler => {
+    if (handler.isLoggedIn) {
+      document.getElementById("hide-id").style.display = "";
+
+      var LogoutButton = document.createElement("button");
+      LogoutButton.innerText = "Logout";
+      LogoutButton.classList.add("btn");
+      LogoutButton.classList.add("btn-danger");
+      LogoutButton.onclick = function () { window.open(handler.authLink, "_self"); };
+
+      document.getElementById("comments-link").innerHTML = "";
+      document.getElementById("comments-link").appendChild(LogoutButton);
+      loadNickname();
+    }
+    else {
+      document.getElementById("hide-id").style.display = "none";
+
+      var LoginButton = document.createElement("button");
+      LoginButton.innerText = "Login to see the contents";
+      LoginButton.classList.add("btn");
+      LoginButton.classList.add("btn-success");
+      LoginButton.onclick = function () { window.open(handler.authLink, "_self"); };
+
+      document.getElementById("comments-link").innerHTML = "";
+      document.getElementById("comments-link").appendChild(LoginButton);
+      return false;
+    }
+  });
+}
+
+function loadNickname() {
+  fetch("/user-info").then(response => response.json()).then(user => {
+    var nickname = user.nickname;
+    var email = user.email;
+    var id = user.id;
+    if (nickname.length < 1) {
+      document.getElementById("nickname-container").style.display = "";
+    }
+    else {
+      document.getElementById("hide-unlogged").style.display = "";
+      document.getElementById("nickname-display").style.display = "";
+
+      var elem = document.createElement("p");
+      elem.innerText = "Your nickname is currently: " + nickname;
+
+      var anchor = document.createElement("a");
+      anchor.setAttribute("href", "#");
+      anchor.setAttribute("onclick", "showElementByID('nickname-container'); hideElementByID('hide-unlogged')");
+      anchor.innerHTML = "here";
+
+      document.getElementById("nickname-display").innerHTML = "If you want to change your nickname click ";
+      document.getElementById("nickname-display").appendChild(anchor);
+      document.getElementById("nickname-display").appendChild(elem);
+    }
+
+  })
+}
+
+function showElementByID(ID) {
+  document.getElementById(ID).style.display = "";
+}
+
+function hideElementByID(ID) {
+  document.getElementById(ID).style.display = "none";
 }

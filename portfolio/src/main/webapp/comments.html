@@ -16,7 +16,7 @@
   <script src="script.js"></script>
 </head>
 
-<body onload="FetchComments()">
+<body onload="fetchComments()" style="overflow-x: hidden;">
   <div id="navBar">
     <!-- Used to include the same navbar on each page.-->
     <script>
@@ -28,7 +28,7 @@
   <div style="position: relative; left: 25%; width: 50vw;">
     <label for="number_comments">How many comments to be displayed:</label>
 
-    <select id="number_comments" onchange="FetchComments()">
+    <select id="number_comments" onchange="fetchComments()">
       <option value="5">5</option>
       <option value="10">10</option>
       <option value="25">25</option>
@@ -37,15 +37,33 @@
   </div>
   <ul class="comment-section">
   </ul>
-  <form action="/new-comment" method="POST">
-    <input type="text" placeholder="Enter your name" name="name" required>
-    <input type="text" placeholder="Enter your comment" name="message" required>
-    <div class="g-recaptcha" data-sitekey="6LfSp7QZAAAAAKzxVJHz3Yf8ULELyMgE24r96BxF" style="left: 25%; position: relative;"></div>
-    <br />
-    <input type="submit" />
-  </form>
-  <div style="position: relative; left: 25%; width: 50vw;">
-    <button class="btn btn-danger" onclick="DeleteComments()">Click here to delete all comments.</button>
+  <div id="hide-id">
+    <div id="nickname-display" style="display: none; left: 25%; position: relative; width: 50vw;">
+
+      If you want to change your nickname, click <a id="nickname-change" href="#"
+        onclick="showElementByID('nickname-container'); hideElementByID('hide-unlogged')">here</a>
+    </div>
+    <div id="nickname-container" style="display: none;">
+      <form action="/user-info" method="POST">
+        <input type="text" placeholder="Enter a desired nickname" name="nickname" required>
+        <input type="submit" />
+      </form>
+    </div>
+    <div id="hide-unlogged" style="display: none;">
+      <form action="/new-comment" method="POST">
+        <input type="text" placeholder="Enter your comment" name="message" required>
+        <div class="g-recaptcha" data-sitekey="6LfSp7QZAAAAAKzxVJHz3Yf8ULELyMgE24r96BxF"
+          style="left: 25%; position: relative;"></div>
+        <br />
+        <input type="submit" />
+      </form>
+      <div style="position: relative; left: 25%; width: 50vw;">
+        <button class="btn btn-danger" onclick="deleteComments()">Click here to delete all comments.</button>
+      </div>
+    </div>
+  </div>
+  <div class="comments-button" id="comments-link">
+
   </div>
 </body>
 

@@ -34,31 +34,33 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/**
- * Servlet that returns some example content.
- */
 @WebServlet("/comments")
 public class DataServlet extends HttpServlet {
   private List<Comment> arr = new ArrayList<>();
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    Query q = new Query("Comment").addSort("timestamp");
+    Query commentsQuery = new Query("Comment").addSort("timestamp");
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
-    PreparedQuery results = datastore.prepare(q);
+    PreparedQuery results = datastore.prepare(commentsQuery);
     List<Comment> arr = new ArrayList<>();
     int how_many = Integer.parseInt(request.getParameter("how_many"));
 
     for (Entity it : results.asIterable()) {
       String message = (String) it.getProperty("message");
-      String name = (String) it.getProperty("name");
+      String uid = (String) it.getProperty("id");
       long timestamp = (long) it.getProperty("timestamp");
       long id = (long) it.getKey().getId();
 
+      Query nicknameQuery = new Query("Users").setFilter(new Query.FilterPredicate("id", Query.FilterOperator.EQUAL, uid));
+      PreparedQuery result = datastore.prepare(nicknameQuery); // Get the nickname of the user who wrote the current comment
+      Entity givenEntity = result.asSingleEntity();
+
+      String name = (String) givenEntity.getProperty("nickname");
       arr.add(new Comment(message, name, timestamp, id));
       --how_many;
-    
+      
       if (how_many == 0) // If how_many goes below 0, all the comments will be loaded in the list and displayed
         break;           // on the html page. So, setting a value <=0 in the POST request will display all the comments
     }

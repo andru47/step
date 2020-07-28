@@ -95,7 +95,7 @@ function deleteComments() {
   fetch("/delete-comment", { method: 'POST' }).then(response => fetchComments());
 }
 
-function loadUserInformation() {
+function loadAuthInformation() {
   fetch('/auth').then(response => response.json()).then(handler => {
     if (handler.isLoggedIn) {
       document.getElementById("hide-id").style.display = "";

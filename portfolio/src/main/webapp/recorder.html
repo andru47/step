@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<a id="download">Download</a>
+<button id="stop">Stop</button>
+<script>
+    var shouldStop = false;
+    var stopped = false;
+    var downloadLink = document.getElementById('download');
+    var stopButton = document.getElementById('stop');
+
+    const handleSuccess = function (stream) {
+        const options = { mimeType: 'audio/webm' };
+        const recordedChunks = [];
+        const mediaRecorder = new MediaRecorder(stream, options);
+
+        mediaRecorder.addEventListener('dataavailable', function (e) {
+            if (e.data.size > 0) {
+                recordedChunks.push(e.data);
+            }
+        });
+
+        mediaRecorder.addEventListener('stop', function () {
+            var blob = new Blob(recordedChunks);
+            var reader = new FileReader();
+            reader.readAsDataURL(blob);
+            reader.onloadend = function () {
+                var base64String = reader.result;
+                fetch("/speech", { method: 'POST', body: base64String.substr(base64String.indexOf(',') + 1) }).then(response => response.json()).then(comments => {
+                    comments.forEach(element => {
+                        console.log(element);
+                    });
+                });
+            }
+        });
+
+        mediaRecorder.start();
+
+        stopButton.addEventListener('click', function () {
+            shouldStop = true;
+            if (stopped === false) {
+                mediaRecorder.stop();
+                stopped = true;
+            }
+        });
+    };
+
+    navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+        .then(handleSuccess);
+
+</script>
+
+</html>

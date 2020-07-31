@@ -66,12 +66,13 @@ function showImage() {
 
 function fetchComments() {
   var nr = document.getElementById("number_comments").value;
+  var lang = document.getElementById("lang_code").value;
   document.getElementsByClassName("comment-section")[0].innerHTML = '';
-  fetch('/comments?how_many=' + nr).then(response => response.json()).then(messages => {
+  fetch('/comments?how_many=' + nr + "&lang=" + lang).then(response => response.json()).then(messages => {
     messages.forEach(message => {
       makeElement(message.nickname, message.comment);
     })
-  }).then(loadUserInformation());
+  }).then(loadAuthInformation());
 }
 
 function makeElement(nickname, message) {

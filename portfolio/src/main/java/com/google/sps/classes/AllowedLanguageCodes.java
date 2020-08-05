@@ -2,6 +2,8 @@ package com.google.sps.classes;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 public class AllowedLanguageCodes {
@@ -10,17 +12,18 @@ public class AllowedLanguageCodes {
       new Language("French", "fr", "fr-FR", 3) };
 
   public static List<Language> getTranslationLanguageList() {
-    List<Language> lst = new ArrayList<>();
-    for (Language it : translationLangCodes)
-      lst.add(it);
-    return lst;
+    return Collections.unmodifiableList(Arrays.asList(translationLangCodes));
   }
 
-  public static String getTranslationCodeForIndex(int index) {
-    return translationLangCodes[index].getTranslationCode();
+  public static String getTranslationCodeForId(int id) {
+    if (id < 0 || id >= translationLangCodes.length)
+      return null;
+    return translationLangCodes[id].getTranslationCode();
   }
 
-  public static String getSpeechCodeForIndex(int index) {
-    return translationLangCodes[index].getSpeechCode();
+  public static String getSpeechCodeForId(int id) {
+    if (id < 0 || id >= translationLangCodes.length)
+      return null;
+    return translationLangCodes[id].getSpeechCode();
   }
 }

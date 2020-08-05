@@ -24,20 +24,19 @@ public class RecognitionServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
     String base64Audio = request.getReader().readLine();
     byte[] decodedAudio = Base64.getDecoder().decode(base64Audio);
-    int langIndex = Integer.parseInt(request.getParameter("langIndex"));
-    int langIndexMax = AllowedLanguageCodes.getTranslationLanguageList().size() - 1;
+    int langId = Integer.parseInt(request.getParameter("langId"));
+    String langCode = AllowedLanguageCodes.getSpeechCodeForId(langId);
 
-    if (langIndex > langIndexMax || langIndex < 0) {
+    if (langCode == null){
       response.setHeader("error", "The language sent is not currently supported.");
       response.sendError(500);
       return;
     }
 
-    String languageCode = AllowedLanguageCodes.getSpeechCodeForIndex(langIndex);
     SpeechClient speechClient = SpeechClient.create();
     RecognitionConfig.AudioEncoding encoding = RecognitionConfig.AudioEncoding.LINEAR16;
     RecognitionConfig config = RecognitionConfig.newBuilder().setEncoding(encoding).setAudioChannelCount(2)
-        .setLanguageCode(languageCode).setEnableAutomaticPunctuation(true).build();
+        .setLanguageCode(langCode).setEnableAutomaticPunctuation(true).build();
     RecognitionAudio audio = RecognitionAudio.newBuilder().setContent(ByteString.copyFrom(decodedAudio)).build();
     RecognizeResponse apiResponse = speechClient.recognize(config, audio);
 

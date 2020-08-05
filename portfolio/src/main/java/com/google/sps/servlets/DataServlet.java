@@ -52,17 +52,15 @@ public class DataServlet extends HttpServlet {
     PreparedQuery results = datastore.prepare(commentsQuery);
     List<Comment> arr = new ArrayList<>();
     int how_many = Integer.parseInt(request.getParameter("how_many"));
-    int langIndex = Integer.parseInt(request.getParameter("langIndex"));
-    int langIndexMax = AllowedLanguageCodes.getTranslationLanguageList().size() - 1;
+    int langId = Integer.parseInt(request.getParameter("langId"));
+    String langCode = AllowedLanguageCodes.getTranslationCodeForId(langId);
 
-    if (langIndex > langIndexMax || langIndex < 0){
+    if (langCode == null){
       response.setHeader("error", "The language sent is not currently supported.");
       response.sendError(500);
       return;
     }
 
-    String langCode = AllowedLanguageCodes.getTranslationCodeForIndex(langIndex);
-    
     for (Entity it : results.asIterable()) {
       String message = (String) it.getProperty("message");
       String uid = (String) it.getProperty("id");

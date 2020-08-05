@@ -66,12 +66,12 @@ function showImage() {
 
 function fetchComments() {
   var nr = document.getElementById("number_comments").value;
-  var index = document.getElementById("lang_code").value;
-  if (!index)
-    index = 0; //Set default language to English
+  var id = document.getElementById("lang_code").value;
+  if (!id)
+    id = 0; //Set default language to English
 
   document.getElementsByClassName("comment-section")[0].innerHTML = '';
-  fetch('/comments?how_many=' + nr + "&langIndex=" + index).then(response => {
+  fetch('/comments?how_many=' + nr + "&langId=" + id).then(response => {
     if (response.ok)
       return response.json();
     else throw new Error(response.headers.get("error"));
@@ -177,10 +177,10 @@ function fetchLanguages() {
   fetch("/languages").then(response => response.json()).then(languages => {
     languages.forEach(language => {
       var languageName = language.languageName;
-      var index = language.languageIndex;
+      var id = language.languageId;
       var element = document.createElement("option");
       element.innerHTML = languageName;
-      element.value = index;
+      element.value = id;
       document.getElementById("lang_code").appendChild(element);
     });
   });
@@ -219,10 +219,10 @@ function stopRecording() {
         var base64String = reader.result;
         document.getElementById("transcript-placeholder").setAttribute("placeholder", "Please wait");
        
-        var index = document.getElementById("lang_code").value;
-        if (!index)
-          index = 0; //Set default language to English
-        fetch("/speech?langIndex=" + index, { method: 'POST', body: base64String.substr(base64String.indexOf(',') + 1) }).then(response => {
+        var id = document.getElementById("lang_code").value;
+        if (!id)
+          id = 0; //Set default language to English
+        fetch("/speech?langId=" + id, { method: 'POST', body: base64String.substr(base64String.indexOf(',') + 1) }).then(response => {
         if (response.status == 200)
           return response.json();
         else throw new Error(response.headers.get("error"));

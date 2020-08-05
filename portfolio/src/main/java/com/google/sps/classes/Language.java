@@ -4,13 +4,13 @@ public class Language {
   private String languageName = "";
   private String languageTranslationCode = "";
   private String languageSpeechCode = "";
-  private int languageIndex;
+  private int languageId;
 
-  public Language(String languageName, String languageTranslationCode, String languageSpeechCode, int languageIndex) {
+  public Language(String languageName, String languageTranslationCode, String languageSpeechCode, int languageId) {
     this.languageName = languageName;
     this.languageTranslationCode = languageTranslationCode;
     this.languageSpeechCode = languageSpeechCode;
-    this.languageIndex = languageIndex;
+    this.languageId = languageId;
   }
 
   public String getTranslationCode() {

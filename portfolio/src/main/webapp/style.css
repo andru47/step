@@ -32,11 +32,19 @@
 
 input{
   left: 25%;
-  width: 50vw;
+  width: 45vw;
   height: 5vh;
   position: relative;
   overflow: scroll;
   min-height: 30px;
+}
+
+*{
+  line-height: normal;
+}
+
+#nickname-container > form > input{
+  width: 50vw !important;
 }
 
 .comment{
@@ -159,4 +167,12 @@ img.dog{
   height: auto;
   max-width: 30px;
   max-height: 30px;
+}
+
+#record-button{
+  position: absolute;
+  right: 25%;
+  height: 5vh;
+  min-height: 30px;
+  width: 5vw;
 }

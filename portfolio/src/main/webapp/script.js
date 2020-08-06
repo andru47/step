@@ -66,13 +66,23 @@ function showImage() {
 
 function fetchComments() {
   var nr = document.getElementById("number_comments").value;
-  var lang = document.getElementById("lang_code").value;
+  var id = document.getElementById("lang_code").value;
+  if (!id)
+    id = 0; //Set default language to English
+
   document.getElementsByClassName("comment-section")[0].innerHTML = '';
-  fetch('/comments?how_many=' + nr + "&lang=" + lang).then(response => response.json()).then(messages => {
+  fetch('/comments?how_many=' + nr + "&langId=" + id).then(response => {
+    if (response.ok)
+      return response.json();
+    else throw new Error(response.headers.get("error"));
+    }).then(messages => {
     messages.forEach(message => {
       makeElement(message.nickname, message.comment);
     })
-  }).then(loadAuthInformation());
+  }).then(loadAuthInformation()).catch(error => {
+    loadAuthInformation();
+    alert(error);
+  });
 }
 
 function makeElement(nickname, message) {
@@ -162,3 +172,82 @@ function showElementByID(ID) {
 function hideElementByID(ID) {
   document.getElementById(ID).style.display = "none";
 }
+
+function fetchLanguages() {
+  fetch("/languages").then(response => response.json()).then(languages => {
+    languages.forEach(language => {
+      var languageName = language.languageName;
+      var id = language.languageId;
+      var element = document.createElement("option");
+      element.innerHTML = languageName;
+      element.value = id;
+      document.getElementById("lang_code").appendChild(element);
+    });
+  });
+}
+
+var recorder;
+
+function startRecording() {
+  navigator.mediaDevices.getUserMedia({
+    video: false,
+    audio: true,
+  }).then(async function (stream) {
+    recorder = RecordRTC(stream, {
+      type: 'audio',
+      mimeType: 'audio/wav',
+      recorderType: StereoAudioRecorder
+    });
+    recorder.setRecordingDuration(10 * 1000).onRecordingStopped(function (url) {
+      alert("Please speak again and click the Stop recording button before 10 seconds of recording.");
+      recordRedirect();
+    });
+    document.getElementById("record-button").innerHTML = "Stop <icon class='fa fa-microphone'></icon>";
+    document.getElementById("transcript-placeholder").value = "";
+    document.getElementById("transcript-placeholder").setAttribute("placeholder", "Recording...");
+    recorder.startRecording();
+  });
+}
+
+function stopRecording() {
+  if (recorder.getState() == "recording") { //Only make call to api if recorder was not stopped because of overflowing the duration
+    recorder.stopRecording(function () {
+      let blob = recorder.getBlob();
+      var reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onloadend = function () {
+        var base64String = reader.result;
+        document.getElementById("transcript-placeholder").setAttribute("placeholder", "Please wait");
+       
+        var id = document.getElementById("lang_code").value;
+        if (!id)
+          id = 0; //Set default language to English
+        fetch("/speech?langId=" + id, { method: 'POST', body: base64String.substr(base64String.indexOf(',') + 1) }).then(response => {
+        if (response.status == 200)
+          return response.json();
+        else throw new Error(response.headers.get("error"));
+        }).then(transcript => {
+          document.getElementById("transcript-placeholder").value = transcript;
+          document.getElementById("transcript-placeholder").innerHTML = transcript;
+          document.getElementById("transcript-placeholder").setAttribute("placeholder", "Enter your comment");
+        }).catch(error => {
+          document.getElementById("transcript-placeholder").setAttribute("placeholder", "Enter your comment");
+          alert(error);
+        });
+      }
+      document.getElementById("record-button").innerHTML = "Record <icon class='fa fa-microphone'></icon>";
+    });
+  }
+  else {
+    document.getElementById("record-button").innerHTML = "Record <icon class='fa fa-microphone'></icon>";
+    document.getElementById("transcript-placeholder").setAttribute("placeholder", "Enter your comment");
+  }
+}
+
+var recordRedirect = (function () {
+  var first = true;
+  return function () {
+    first ? startRecording() : stopRecording();
+    first = !first;
+  }
+})();

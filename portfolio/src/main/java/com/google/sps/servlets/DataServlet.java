@@ -14,6 +14,7 @@
 
 package com.google.sps.servlets;
 
+import com.google.sps.classes.AllowedLanguageCodes;
 import com.google.sps.classes.Comment;
 
 import java.io.IOException;
@@ -51,17 +52,15 @@ public class DataServlet extends HttpServlet {
     PreparedQuery results = datastore.prepare(commentsQuery);
     List<Comment> arr = new ArrayList<>();
     int how_many = Integer.parseInt(request.getParameter("how_many"));
-    String langCode = (String) request.getParameter("lang");
+    int langId = Integer.parseInt(request.getParameter("langId"));
+    String langCode = AllowedLanguageCodes.getTranslationCodeForId(langId);
 
-    String[] acceptedCodes = {"en", "ro", "de", "fr"};
-    if (!Arrays.asList(acceptedCodes).contains(langCode)){
-      response.setContentType("text/html");
-      response.getWriter().print("<script>alert(\"Please use an accepted language code.\")</script>");
-      RequestDispatcher dispatcher = request.getRequestDispatcher("/comments.html");
-      dispatcher.include(request, response);
+    if (langCode == null){
+      response.setHeader("error", "The language sent is not currently supported.");
+      response.sendError(500);
       return;
     }
-    
+
     for (Entity it : results.asIterable()) {
       String message = (String) it.getProperty("message");
       String uid = (String) it.getProperty("id");

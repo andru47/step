@@ -12,11 +12,12 @@
     integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
     crossorigin="anonymous"></script>
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-
+  <script src="https://use.fontawesome.com/882c74b8a2.js"></script>
+  <script src="https://www.WebRTC-Experiment.com/RecordRTC.js"></script>
   <script src="script.js"></script>
 </head>
 
-<body onload="fetchComments()" style="overflow-x: hidden;">
+<body onload="fetchLanguages(); fetchComments()" style="overflow-x: hidden;">
   <div id="navBar">
     <!-- Used to include the same navbar on each page.-->
     <script>
@@ -38,10 +39,10 @@
     <label for="lang_code">Select the language:</label>
 
     <select id="lang_code" onchange="fetchComments()">
-      <option value="en" selected>English</option>
+      <!--<option value="en" selected>English</option>
       <option value="ro">Romanian</option>
       <option value="fr">French</option>
-      <option value="de">German</option>
+      <option value="de">German</option>-->
     </select>
   </div>
   <ul class="comment-section">
@@ -52,6 +53,9 @@
       If you want to change your nickname, click <a id="nickname-change" href="#"
         onclick="showElementByID('nickname-container'); hideElementByID('hide-unlogged')">here</a>
     </div>
+    <div style="left: 25%; position: relative; width: 50vw;">
+      If you use the "Record" function, please note that you have to speak in the language chosen above. Only English and German has automatic punctuation.
+    </div>
     <div id="nickname-container" style="display: none;">
       <form action="/user-info" method="POST">
         <input type="text" placeholder="Enter a desired nickname" name="nickname" required>
@@ -60,7 +64,8 @@
     </div>
     <div id="hide-unlogged" style="display: none;">
       <form action="/new-comment" method="POST">
-        <input type="text" placeholder="Enter your comment" name="message" required>
+        <input type="text" placeholder="Enter your comment" name="message" id="transcript-placeholder" required>
+        <button type="button" id="record-button" onclick="recordRedirect()">Record <i class="fa fa-microphone"></i></button>
         <div class="g-recaptcha" data-sitekey="6LfSp7QZAAAAAKzxVJHz3Yf8ULELyMgE24r96BxF"
           style="left: 25%; position: relative;"></div>
         <br />

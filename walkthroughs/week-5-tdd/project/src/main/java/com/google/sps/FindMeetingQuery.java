@@ -23,45 +23,44 @@ import java.util.TreeSet;
 
 public final class FindMeetingQuery {
   public Collection<TimeRange> query(Collection<Event> events, MeetingRequest request) {
-    ArrayList<TimeRange> lst = new ArrayList<>();
     HashSet<String> mandatoryParticipants = new HashSet<>(request.getAttendees());
     HashSet<String> optionalParticipants = new HashSet<>(request.getOptionalAttendees());
     TreeSet<TimeRange> busyTimesMandatory = new TreeSet<>(TimeRange.ORDER_BY_START);
     TreeSet<TimeRange> busyTimesBoth = new TreeSet<>(TimeRange.ORDER_BY_START);
 
     for (Event it : events){
-      if (eventHasGivenParticipants(it.getAttendees(), optionalParticipants) || eventHasGivenParticipants(it.getAttendees(), mandatoryParticipants))
+      if (eventHasAnyOfGivenParticipants(it.getAttendees(), optionalParticipants) || eventHasAnyOfGivenParticipants(it.getAttendees(), mandatoryParticipants))
         busyTimesBoth.add(it.getWhen());
-      if (!eventHasGivenParticipants(it.getAttendees(), mandatoryParticipants)) // Do not include event if no mandatory participants attend
+      if (!eventHasAnyOfGivenParticipants(it.getAttendees(), mandatoryParticipants)) // Do not include event if no mandatory participants attend
         continue;
       busyTimesMandatory.add(it.getWhen());
     }
 
-    Collection<TimeRange> availableTimesForBoth = getAvailableTimes(busyTimesBoth, request.getDuration());
+    Collection<TimeRange> availableTimesForBoth = getPossibleTimesForMeeting(busyTimesBoth, request.getDuration());
     if (availableTimesForBoth.isEmpty())
-      return getAvailableTimes(busyTimesMandatory, request.getDuration());
-    else return availableTimesForBoth;
+      return getPossibleTimesForMeeting(busyTimesMandatory, request.getDuration());
+    return availableTimesForBoth;
   }
 
-  private Collection<TimeRange> getAvailableTimes(Collection<TimeRange> busyTimes, long duration){
+  private Collection<TimeRange> getPossibleTimesForMeeting(Collection<TimeRange> busyTimes, long duration){
     if (busyTimes.isEmpty() && duration <= TimeRange.WHOLE_DAY.duration())
       return Arrays.asList(TimeRange.WHOLE_DAY);
     ArrayList<TimeRange> availableTimes = new ArrayList<>();
-    int last = TimeRange.START_OF_DAY;
+    int current = TimeRange.START_OF_DAY;
     
-    for (TimeRange it : busyTimes){
-      if (it.start() >= last && it.start() - last >= duration)
-        availableTimes.add(TimeRange.fromStartEnd(last, it.start(), false));
-      if (last< it.end())
-        last = it.end();
+    for (TimeRange busyTime : busyTimes){
+      if (busyTime.start() >= current && busyTime.start() - current >= duration)
+        availableTimes.add(TimeRange.fromStartEnd(current, busyTime.start(), false));
+      if (current< busyTime.end())
+      current = busyTime.end();
     }
-    if (TimeRange.END_OF_DAY -  last >= duration)
-      availableTimes.add(TimeRange.fromStartEnd(last, TimeRange.END_OF_DAY, true));
+    if (TimeRange.END_OF_DAY - current >= duration)
+      availableTimes.add(TimeRange.fromStartEnd(current, TimeRange.END_OF_DAY, true));
 
     return availableTimes;
   }
 
-  private boolean eventHasGivenParticipants(Collection<String> eventParticipants, Collection<String> givenParticipants){
+  private boolean eventHasAnyOfGivenParticipants(Collection<String> eventParticipants, Collection<String> givenParticipants){
     for (String participant : eventParticipants)
       if (givenParticipants.contains(participant))
         return true;
